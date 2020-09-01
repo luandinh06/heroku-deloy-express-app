@@ -1,40 +1,41 @@
-var db = require('../db');
+// var db = require('../db');
+var User = require('../models/user.model');
 var md5 = require('md5');
 
 module.exports.login = function (req, res) {
     res.render('auth/login');
 };
 
-module.exports.postLogin = function (req, res) {
-    var email = req.body.email;
+module.exports.postLogin = async function (req, res) {
+    var userName = req.body.userName;
     var password = req.body.password;
 
-    var user = db.get('users').find({ email: email }).value();
+    var user = await User.find({ userName: userName });
 
-    if (!user) {
+    // if (!user) {
+    if (!user.length) {
         res.render('auth/login', {
             errors: [
-                'User does not exist.'
+                'User name does not exist.'
             ],
-            value: { email, password }
+            value: { userName, password }
         });
         return;
     }
 
     var hasshedPassword = md5(password);
-
-    if (user.password !== hasshedPassword) {
+    if (user[0].password !== hasshedPassword) {
         res.render('auth/login', {
             errors: [
                 'Wrong password.'
             ],
-            value: { email, password }
+            value: { userName, password }
         });
         return;
     }
 
-    // res.cookie('userID', user.id);
-    res.cookie('userID', user.id, { signed: true });
+    // res.cookie('userID', user[0].id);
+    res.cookie('userID', user[0].id, { signed: true });
 
     res.redirect('/users');
 };

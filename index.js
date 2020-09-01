@@ -13,8 +13,6 @@ var cartRouter = require('./routers/cart.route');
 var authMiddleware = require('./middleware/auth.middleware');
 var sessionMiddleware = require('./middleware/session.middleware');
 
-process.env.localDB = true;
-
 mongoose.connect(process.env.MONGODB_URI, {
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -22,60 +20,34 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
     .then(() => {
         console.log('connect Atlas database successfully');
-        process.env.localDB = false;
     })
     .catch((error) => {
         console.log('connect Atlas mongoDB fail');
         console.log(error);
-        mongoose.connect(process.env.MONGODB_LOCAL_URI, {
-            useCreateIndex: true,
-            useUnifiedTopology: true,
-            useNewUrlParser: true
-        })
-            .then(() => {
-                console.log('connect local database successfully');
-            })
-            .catch((error) => {
-                console.log('connect local database fail');
-                console.log(error);
-            });
     });
-
-// mongoose.connect(process.env.MONGODB_LOCAL_URI, {
-//     useCreateIndex: true,
-//     useUnifiedTopology: true,
-//     useNewUrlParser: true
-// })
-//     .then(() => {
-//         console.log('connect local database successfully');
-//     })
-//     .catch((error) => {
-//         console.log('connect local database fail');
-//         console.log(error);
-//     });
 
 var app = express();
 
 var port = process.env.PORT || 3000;
 
-// app.set('view engine', 'pug');
-// app.set('views', './views')
+app.set('view engine', 'pug');
+app.set('views', './views')
 
-// app.use(bodyParser.json()) // for parsing application/json
-// app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
-// app.use(cookieParser(process.env.SESSION_SECRET));
-// app.use(sessionMiddleware);
-// // app.use(cookieParser());
+app.use(bodyParser.json()) // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(sessionMiddleware);
+// app.use(cookieParser());
 
-// app.use(express.static('public'));
+app.use(express.static('public'));
 
-// app.get('/', authMiddleware.requireAuth, function (req, res) {
-//     res.render('layouts/header.pug');
-// });
+app.get('/', function (req, res) {
+    res.render('layouts/header.pug');
+});
 
-// app.use('/users', authMiddleware.requireAuth, userRoute);
-// app.use('/products', authMiddleware.requireAuth, productRouter);
-// app.use('/auth', authRouter);
+app.use('/users', authMiddleware.requireAuth, userRoute);
+app.use('/products', productRouter);
+app.use('/auth', authRouter);
 // app.use('/cart', cartRouter);
 
 app.listen(port, function () {

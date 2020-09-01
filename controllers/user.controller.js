@@ -2,26 +2,12 @@ var db = require('../db');
 var User = require('../models/user.model');
 const shortId = require('shortid');
 const { use } = require('../routers/auth.route');
-const e = require('express');
 
 module.exports.index = async function (request, response) {
-    // if (process.env.localDB) {
+    var users = await User.find();
     response.render('users/index-users-pug', {
-        users: db.get('users').value()
+        users: users
     });
-    User.find().then(function (users) {
-        response.render('users/index-users-pug', {
-            users: users
-        });
-    });
-    // }
-    // else {
-    //     var users = await User.find();
-    //     // var users = [];
-    //     response.render('users/index-users-pug', {
-    //         users: users
-    //     });
-    // }
 };
 
 module.exports.search = function (req, res) {
