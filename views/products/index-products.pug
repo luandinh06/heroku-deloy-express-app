@@ -1,0 +1,27 @@
+extends ../layouts/header.pug
+block header
+    
+    h1 Products
+    .container
+        .row
+            each product in products
+                .col-xs-3.col-sm-3.col-md-3.col-lg-3.mb-5
+                    .card
+                        img.card-img-top(src=product.image, alt='Card image', style='width:100%')
+                        .card-body
+                            h4.card-title=product.name
+                            p.card-text=product.discription
+                            a.btn.btn-primary(href='#') See More
+                            br
+                            a.btn.btn-primary.mt-2(href='/cart/add/'+ product.id) Add To Cart
+        ul.pagination.justify-content-center
+            li.page-item
+                a.page-link(href='/products?page='+(page-1)) Previous
+            li.page-item
+                a.page-link(href='/products?page='+page)=page
+            li.page-item
+                a.page-link(href='/products?page='+(page+1))=page+1
+            li.page-item
+                a.page-link(href='/products?page='+(page+2))=page+2
+            li.page-item
+                a.page-link(href='/products?page='+(page+1)) Next

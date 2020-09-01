@@ -1,0 +1,22 @@
+html
+    head
+        //- link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css')
+        link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css')
+    body
+        nav.navbar.navbar-expand-sm.bg-light
+            // Brand/logo
+            a.navbar-brand(href='/') MyWed
+            // Links
+            ul.navbar-nav.mr-auto
+                li.nav-item
+                    a.nav-link(href='/users') Users
+                li.nav-item
+                    a.nav-link(href='/users/create') Create
+                li.nav-item
+                    a.nav-link(href='/products') Products
+            ul.navbar-nav
+                li.nav-item
+                    if user
+                        a.nav-link=user.name
+        .container.mt-5    
+            block header
