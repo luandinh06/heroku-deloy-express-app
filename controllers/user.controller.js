@@ -2,6 +2,7 @@ var db = require('../db');
 var User = require('../models/user.model');
 const shortId = require('shortid');
 const { use } = require('../routers/auth.route');
+var md5 = require('md5');
 
 module.exports.index = async function (request, response) {
     var users = await User.find();
@@ -29,11 +30,32 @@ module.exports.create = function (req, res) {
 };
 
 module.exports.postCreate = function (req, res) {
-    req.body.id = shortId.generate();
-    req.body.avatar = req.file.path.split('\\').slice(1).join('/');
+    var userInfo = {};
+    try {
+        try {
+            req.body.avatar = req.file.path.split('\\').slice(1).join('/');
+        } catch (error) {
+            req.body.avatar = '';
+            console.log('error req.file.path');
+        }
+        userInfo = req.body;
+        // console.log(userInfo.userName);
+        // db.get('users').push(req.body).write();
 
-    db.get('users').push(req.body).write();
-    res.redirect('/users');
+        var user = new User({
+            userName: userInfo.userName,
+            phone: userInfo.phone,
+            password: md5(userInfo.password),
+            avatar: userInfo.avatar
+        });
+
+        user.save(function (err, user) {
+            if (err) return console.error(err);
+        });
+        res.redirect('/users');
+    } catch (error) {
+        console.log('Error: save user in database');
+    }
 };
 
 module.exports.get = function (req, res) {
