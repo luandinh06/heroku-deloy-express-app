@@ -4,6 +4,15 @@ const shortId = require('shortid');
 const { use } = require('../routers/auth.route');
 var md5 = require('md5');
 
+cloudinary = require('cloudinary').v2;
+
+// set up cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 module.exports.index = async function (request, response) {
     var users = await User.find();
     response.render('users/index-users-pug', {
@@ -31,16 +40,39 @@ module.exports.create = function (req, res) {
 
 module.exports.postCreate = function (req, res) {
     var userInfo = {};
-    try {
-        try {
-            req.body.avatar = req.file.path.split('\\').slice(1).join('/');
-        } catch (error) {
-            req.body.avatar = '';
-            console.log('error req.file.path');
-        }
-        userInfo = req.body;
-        // console.log(userInfo.userName);
-        // db.get('users').push(req.body).write();
+
+    userInfo = req.body;
+
+    if (req.file) {
+        cloudinary.uploader.upload(req.file.path, function (error, result) {
+            if (error) {
+                console.log(error);
+            } else {
+                userInfo.avatar = result.secure_url;
+            }
+
+            var user = new User({
+                userName: userInfo.userName,
+                phone: userInfo.phone,
+                password: md5(userInfo.password),
+                avatar: userInfo.avatar
+            });
+
+            user.save(function (err, user) {
+                if (err) {
+                    // errorArray.push['error when save user in Mongo Atlas'];
+                    console.log('error when upload in atlas');
+                    // res.redirect('/users/create');;
+                    res.redirect('/users');
+
+                }
+                else {
+                    res.redirect('/users');
+                }
+            });
+        });
+    } else {
+        userInfo.avatar = 'https://res.cloudinary.com/luandinh06/image/upload/v1599657695/ion3ypdmptrzvlsmpfho.jpg';
 
         var user = new User({
             userName: userInfo.userName,
@@ -50,11 +82,16 @@ module.exports.postCreate = function (req, res) {
         });
 
         user.save(function (err, user) {
-            if (err) return console.error(err);
+            if (err) {
+                // errorArray.push['error when save user in Mongo Atlas'];
+                console.log('error when upload in atlas');
+                // res.redirect('/users/create');;
+                res.redirect('/users');
+            }
+            else {
+                res.redirect('/users');
+            }
         });
-        res.redirect('/users');
-    } catch (error) {
-        console.log('Error: save user in database');
     }
 };
 
